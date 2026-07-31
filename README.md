@@ -29,6 +29,7 @@ Student Activities brings campus updates, houses and societies, Voices, recruitm
 - **Calendar, recruitment, elections, and budget** views in one app.
 - **Material and UIX themes** with system-aware dark mode and navigation customization.
 - **Deep links** from `iitmbs.org` and the `iitmbs://` scheme into native screens.
+- **Flutter web target (WIP)** for future browser support. The existing web frontend is available at [iitmbs.org](https://iitmbs.org).
 
 ## Platform Support
 
@@ -36,10 +37,12 @@ Student Activities brings campus updates, houses and societies, Voices, recruitm
 | ------- | ------------------------- | ----------------------------------------------------------------- |
 | Android | `flutter run -d <device>` | APK and AAB                                                       |
 | iOS     | `flutter run -d <device>` | Unsigned IPA in CI; signing is handled by the release environment |
-| Web     | `flutter run -d chrome`   | Static web bundle                                                 |
+| Web     | `flutter run -d chrome`   | WIP, not currently supported                                     |
 | Linux   | `flutter run -d linux`    | Release bundle                                                    |
 | Windows | `flutter run -d windows`  | Release bundle                                                    |
 | macOS   | `flutter run -d macos`    | App bundle                                                        |
+
+The Flutter web target is currently a work in progress and is not a supported web app. Use the existing frontend at [iitmbs.org](https://iitmbs.org) for browser access.
 
 ## Development
 
