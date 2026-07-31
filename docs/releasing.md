@@ -1,6 +1,6 @@
 # Releasing
 
-Releases are created by `.github/workflows/release.yml` in the [Student-Activities-IITM-BS/student-activities-app](https://github.com/Student-Activities-IITM-BS/student-activities-app) repository from a semantic version tag such as `v1.1.0`. The workflow builds Android, iOS, web, Linux, and Windows artifacts, then attaches them to a GitHub release.
+Releases are created by `.github/workflows/release.yml` in the [Student-Activities-IITM-BS/student-activities-app](https://github.com/Student-Activities-IITM-BS/student-activities-app) repository from a semantic version tag such as `v1.1.0`. The workflow builds Android, iOS, the WIP Flutter web target, Linux packages, and Windows packages, then attaches them to a GitHub release.
 
 ## Repository Configuration
 
@@ -22,4 +22,4 @@ The Google client ID is not a private credential, but keeping it in Actions conf
 3. Push a tag such as `v1.1.0`.
 4. Review the generated artifacts and release notes in GitHub.
 
-The Android job produces split APKs, a universal APK, and an AAB. The web, Linux, and Windows jobs produce archives. The Linux build requires the `libsecret-1-dev` system package for secure storage. The iOS job creates an unsigned IPA; App Store signing should happen in the organization’s macOS signing environment.
+The Android job produces split APKs, a universal APK, and an AAB. The Linux job produces a tar.gz bundle, AppImage, DEB, and RPM. The Windows job produces a ZIP, portable EXE, and Inno Setup installer EXE. The Linux build requires the `libsecret-1-dev` system package for secure storage. The iOS job creates an unsigned IPA; App Store signing should happen in the organization’s macOS signing environment.

@@ -13,7 +13,7 @@
   </p>
   <p>
     <img src="https://img.shields.io/badge/Flutter-3.44.4-54C5F8?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter 3.44.4">
-    <img src="https://img.shields.io/badge/Android%20%7C%20iOS%20%7C%20Web%20%7C%20Desktop-supported-2E7D32?style=for-the-badge" alt="Supported platforms">
+    <img src="https://img.shields.io/badge/Android%20%7C%20iOS%20%7C%20Desktop-supported-2E7D32?style=for-the-badge" alt="Supported platforms">
     <img src="https://img.shields.io/badge/SEC%20WebOps-student%20led-263238?style=for-the-badge" alt="SEC WebOps">
   </p>
 </div>
@@ -38,8 +38,8 @@ Student Activities brings campus updates, houses and societies, Voices, recruitm
 | Android | `flutter run -d <device>` | APK and AAB                                                       |
 | iOS     | `flutter run -d <device>` | Unsigned IPA in CI; signing is handled by the release environment |
 | Web     | `flutter run -d chrome`   | WIP, not currently supported                                     |
-| Linux   | `flutter run -d linux`    | Release bundle                                                    |
-| Windows | `flutter run -d windows`  | Release bundle                                                    |
+| Linux   | `flutter run -d linux`    | AppImage, DEB, RPM, and tar.gz                                   |
+| Windows | `flutter run -d windows`  | Installer EXE, portable EXE, and ZIP                             |
 | macOS   | `flutter run -d macos`    | App bundle                                                        |
 
 The Flutter web target is currently a work in progress and is not a supported web app. Use the existing frontend at [iitmbs.org](https://iitmbs.org) for browser access.

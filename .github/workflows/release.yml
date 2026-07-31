@@ -11,6 +11,7 @@ permissions:
 
 env:
   FLUTTER_VERSION: "3.44.4"
+  APP_VERSION: ${{ github.ref_name }}
   API_BASE_URL: ${{ vars.API_BASE_URL || 'https://api.iitmbs.org' }}
 
 jobs:
@@ -128,14 +129,19 @@ jobs:
 
   linux:
     name: Linux release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Check out source
         uses: actions/checkout@v4
       - name: Install Linux build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev
+          sudo apt-get install -y \
+            clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev \
+            dpkg-dev rpm ruby ruby-dev build-essential libfuse2 patchelf wget
+          sudo gem install --no-document fpm
+          wget -O appimagetool-x86_64.AppImage "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x appimagetool-x86_64.AppImage
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -159,11 +165,99 @@ jobs:
             --dart-define=GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID"
       - name: Archive Linux bundle
         run: tar -czf StudentActivities-Linux.tar.gz -C build/linux/x64/release/bundle .
+      - name: Package Linux DEB
+        run: |
+          version="${APP_VERSION#v}"
+          mkdir -p dist/deb/DEBIAN
+          mkdir -p dist/deb/opt/student-activities
+          mkdir -p dist/deb/usr/local/bin
+          mkdir -p dist/deb/usr/share/applications
+          mkdir -p dist/deb/usr/share/icons/hicolor/512x512/apps
+          cp -a build/linux/x64/release/bundle/. dist/deb/opt/student-activities/
+          ln -s /opt/student-activities/student_activities dist/deb/usr/local/bin/student-activities
+          cp web/icons/Icon-512.png dist/deb/usr/share/icons/hicolor/512x512/apps/student-activities.png
+          cat > dist/deb/usr/share/applications/student-activities.desktop <<EOF
+          [Desktop Entry]
+          Name=Student Activities
+          Comment=Student Activities for the IIT Madras BS community
+          Exec=student-activities
+          Icon=student-activities
+          Terminal=false
+          Type=Application
+          Categories=Education;Utility;
+          EOF
+          cat > dist/deb/DEBIAN/control <<EOF
+          Package: student-activities
+          Version: $version
+          Section: education
+          Priority: optional
+          Architecture: amd64
+          Maintainer: SEC WebOps
+          Depends: libgtk-3-0, libsecret-1-0
+          Description: Student Activities
+           Native Student Activities app for the IIT Madras BS community.
+          EOF
+          dpkg-deb --build --root-owner-group dist/deb StudentActivities-Linux.deb
+      - name: Package Linux RPM
+        run: |
+          version="${APP_VERSION#v}"
+          mkdir -p dist/rpm/opt/student-activities
+          mkdir -p dist/rpm/usr/local/bin
+          mkdir -p dist/rpm/usr/share/applications
+          mkdir -p dist/rpm/usr/share/icons/hicolor/512x512/apps
+          cp -a build/linux/x64/release/bundle/. dist/rpm/opt/student-activities/
+          ln -s /opt/student-activities/student_activities dist/rpm/usr/local/bin/student-activities
+          cp web/icons/Icon-512.png dist/rpm/usr/share/icons/hicolor/512x512/apps/student-activities.png
+          cat > dist/rpm/usr/share/applications/student-activities.desktop <<EOF
+          [Desktop Entry]
+          Name=Student Activities
+          Comment=Student Activities for the IIT Madras BS community
+          Exec=student-activities
+          Icon=student-activities
+          Terminal=false
+          Type=Application
+          Categories=Education;Utility;
+          EOF
+          fpm -s dir -t rpm -n student-activities -v "$version" \
+            --package StudentActivities-Linux.rpm \
+            --license Apache-2.0 \
+            --url https://github.com/Student-Activities-IITM-BS/student-activities-app \
+            --description "Student Activities for the IIT Madras BS community" \
+            --depends gtk3 \
+            --depends libsecret \
+            -C dist/rpm .
+      - name: Package Linux AppImage
+        run: |
+          rm -rf AppDir
+          mkdir -p AppDir/usr/bin
+          cp -a build/linux/x64/release/bundle/. AppDir/usr/bin/
+          cat > AppDir/AppRun <<'EOF'
+          #!/bin/sh
+          HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+          exec "$HERE/usr/bin/student_activities" "$@"
+          EOF
+          chmod +x AppDir/AppRun
+          cp web/icons/Icon-512.png AppDir/student-activities.png
+          cat > AppDir/student-activities.desktop <<'EOF'
+          [Desktop Entry]
+          Name=Student Activities
+          Comment=Student Activities for the IIT Madras BS community
+          Exec=student_activities
+          Icon=student-activities
+          Terminal=false
+          Type=Application
+          Categories=Education;Utility;
+          EOF
+          ./appimagetool-x86_64.AppImage --appimage-extract-and-run AppDir StudentActivities-Linux.AppImage
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux-artifacts
-          path: StudentActivities-Linux.tar.gz
+          path: |
+            StudentActivities-Linux.tar.gz
+            StudentActivities-Linux.deb
+            StudentActivities-Linux.rpm
+            StudentActivities-Linux.AppImage
 
   windows:
     name: Windows release
@@ -194,11 +288,56 @@ jobs:
       - name: Archive Windows bundle
         shell: pwsh
         run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath StudentActivities-Windows.zip
+      - name: Copy Windows executable
+        shell: pwsh
+        run: Copy-Item build/windows/x64/runner/Release/student_activities.exe StudentActivities-Windows.exe
+      - name: Create Windows installer script
+        shell: pwsh
+        run: |
+          $version = $env:APP_VERSION -replace '^v', ''
+          @"
+          [Setup]
+          AppName=Student Activities
+          AppVersion=$version
+          AppPublisher=SEC WebOps
+          AppPublisherURL=https://iitmbs.org
+          AppSupportURL=https://github.com/Student-Activities-IITM-BS/student-activities-app
+          DefaultDirName={autopf}\Student Activities
+          DefaultGroupName=Student Activities
+          UninstallDisplayIcon={app}\student_activities.exe
+          SetupIconFile=runner\resources\app_icon.ico
+          ArchitecturesInstallIn64BitMode=x64
+          Compression=lzma2
+          SolidCompression=yes
+          WizardStyle=modern
+          OutputBaseFilename=StudentActivities-Windows-installer
+          OutputDir=Output
+
+          [Files]
+          Source: "..\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+          [Icons]
+          Name: "{group}\Student Activities"; Filename: "{app}\student_activities.exe"
+          Name: "{autodesktop}\Student Activities"; Filename: "{app}\student_activities.exe"
+          "@ | Set-Content windows/installer.iss
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --no-progress --yes
+      - name: Build Windows installer
+        shell: pwsh
+        run: |
+          $iscc = Get-ChildItem -Path @('C:\Program Files (x86)\Inno Setup*', 'C:\Program Files\Inno Setup*') -Filter iscc.exe -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $iscc) { throw 'Inno Setup compiler was not found.' }
+          & $iscc.FullName windows/installer.iss
+          Move-Item windows/Output/StudentActivities-Windows-installer.exe StudentActivities-Windows-installer.exe
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-artifacts
-          path: StudentActivities-Windows.zip
+          path: |
+            StudentActivities-Windows.zip
+            StudentActivities-Windows.exe
+            StudentActivities-Windows-installer.exe
 
   ios:
     name: iOS release
