@@ -7,6 +7,7 @@ pkgs.mkShell {
     cmake
     pkg-config
     gtk3
+    libsecret
     xz
     clang
     ninja

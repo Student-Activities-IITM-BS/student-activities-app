@@ -22,4 +22,4 @@ The Google client ID is not a private credential, but keeping it in Actions conf
 3. Push a tag such as `v1.1.0`.
 4. Review the generated artifacts and release notes in GitHub.
 
-The Android job produces split APKs, a universal APK, and an AAB. The web, Linux, and Windows jobs produce archives. The iOS job creates an unsigned IPA; App Store signing should happen in the organization’s macOS signing environment.
+The Android job produces split APKs, a universal APK, and an AAB. The web, Linux, and Windows jobs produce archives. The Linux build requires the `libsecret-1-dev` system package for secure storage. The iOS job creates an unsigned IPA; App Store signing should happen in the organization’s macOS signing environment.
