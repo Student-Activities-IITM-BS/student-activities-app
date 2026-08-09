@@ -1,4 +1,6 @@
 {
   "API_BASE_URL": "https://api.iitmbs.org",
-  "GOOGLE_CLIENT_ID": ""
+  "GOOGLE_CLIENT_ID": "",
+  "GOOGLE_DESKTOP_CLIENT_ID": "",
+  "GOOGLE_DESKTOP_CLIENT_SECRET": ""
 }

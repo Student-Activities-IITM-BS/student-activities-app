@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:student_activities/core/constants.dart';
 import 'package:student_activities/services/api_client.dart';
+import 'package:student_activities/services/desktop_google_auth_platform.dart';
 import 'package:student_activities/screens/auth/login_screen.dart';
 
 class AuthService {
@@ -23,6 +24,7 @@ class AuthService {
   String? get token => _token;
   Map<String, dynamic>? get user => _user;
   bool get isAuthenticated => _token != null && _token!.isNotEmpty;
+  bool get _isDesktop => !kIsWeb && (Platform.isLinux || Platform.isWindows);
 
   String get userName =>
       _user?['name'] ??
@@ -85,6 +87,7 @@ class AuthService {
   }
 
   Future<void> _ensureInitialized() async {
+    if (_isDesktop) return;
     if (_isInitialized) return;
     final clientId = AppConstants.googleClientId.trim();
     if (clientId.isEmpty) {
@@ -102,6 +105,30 @@ class AuthService {
 
   Future<AuthResult> signIn() async {
     try {
+      if (_isDesktop) {
+        final clientId = AppConstants.googleDesktopClientId.trim();
+        if (clientId.isEmpty) {
+          throw StateError(
+            'Google desktop sign-in is not configured for this build.',
+          );
+        }
+        final clientSecret = AppConstants.googleDesktopClientSecret.trim();
+        if (clientSecret.isEmpty) {
+          throw StateError(
+            'Google desktop client secret is not configured for this build.',
+          );
+        }
+        final credential = await authenticateDesktopGoogle(
+          clientId,
+          clientSecret: clientSecret,
+        );
+        return _completeGoogleCredential(
+          idToken: credential.idToken,
+          email: credential.email,
+          displayName: credential.displayName,
+          photoUrl: credential.photoUrl,
+        );
+      }
       await _ensureInitialized();
       final GoogleSignInAccount account = await GoogleSignIn.instance
           .authenticate(scopeHint: ['email', 'profile']);
@@ -113,10 +140,27 @@ class AuthService {
   }
 
   Future<AuthResult> completeGoogleSignIn(GoogleSignInAccount account) async {
+    final auth = account.authentication;
+    return _completeGoogleCredential(
+      idToken: auth.idToken,
+      email: account.email,
+      displayName: account.displayName,
+      photoUrl: account.photoUrl,
+      signOutGoogle: true,
+    );
+  }
+
+  Future<AuthResult> _completeGoogleCredential({
+    required String? idToken,
+    required String email,
+    String? displayName,
+    String? photoUrl,
+    bool signOutGoogle = false,
+  }) async {
     try {
-      final emailDomain = account.email.split('@').last;
+      final emailDomain = email.split('@').last.toLowerCase();
       if (!AppConstants.allowedDomains.contains(emailDomain)) {
-        await GoogleSignIn.instance.signOut();
+        if (signOutGoogle) await GoogleSignIn.instance.signOut();
         return AuthResult(
           success: false,
           error:
@@ -124,10 +168,8 @@ class AuthService {
         );
       }
 
-      final auth = account.authentication;
-      final idToken = auth.idToken;
       if (idToken == null || idToken.isEmpty) {
-        await GoogleSignIn.instance.signOut();
+        if (signOutGoogle) await GoogleSignIn.instance.signOut();
         return AuthResult(
           success: false,
           error: 'Failed to get authentication token',
@@ -140,7 +182,7 @@ class AuthService {
       );
 
       if (!resp.success) {
-        await GoogleSignIn.instance.signOut();
+        if (signOutGoogle) await GoogleSignIn.instance.signOut();
         return AuthResult(
           success: false,
           error: resp.error ?? 'Backend authentication failed',
@@ -152,7 +194,7 @@ class AuthService {
       final userData = data['user'] as Map<String, dynamic>?;
 
       if (backendToken == null || backendToken.isEmpty) {
-        await GoogleSignIn.instance.signOut();
+        if (signOutGoogle) await GoogleSignIn.instance.signOut();
         return AuthResult(
           success: false,
           error: 'No token received from server',
@@ -162,11 +204,7 @@ class AuthService {
       _token = backendToken;
       _user =
           userData ??
-          {
-            'email': account.email,
-            'name': account.displayName,
-            'picture': account.photoUrl,
-          };
+          {'email': email, 'name': displayName, 'picture': photoUrl};
 
       final prefs = await SharedPreferences.getInstance();
       await _secureStorage.write(
@@ -194,6 +232,15 @@ class AuthService {
     } else if (errStr.contains('network') || errStr.contains('connection')) {
       userFriendlyMessage =
           'Network error. Please check your internet connection.';
+    } else if (errStr.contains('unimplemented') ||
+        errStr.contains('unsupported') ||
+        errStr.contains('desktop sign-in is not configured') ||
+        errStr.contains('desktop client secret is not configured')) {
+      userFriendlyMessage =
+          'Google Sign-In is not configured for this desktop build.';
+    } else if (errStr.contains('client_secret')) {
+      userFriendlyMessage =
+          'The desktop Google OAuth client secret is missing or invalid.';
     } else if (errStr.contains('clientconfigurationerror') ||
         errStr.contains('configuration')) {
       userFriendlyMessage =
@@ -215,9 +262,11 @@ class AuthService {
       await ApiClient.instance.post('/auth/logout');
     } catch (_) {}
 
-    try {
-      await GoogleSignIn.instance.signOut();
-    } catch (_) {}
+    if (!_isDesktop) {
+      try {
+        await GoogleSignIn.instance.signOut();
+      } catch (_) {}
+    }
 
     await _clearSession();
   }

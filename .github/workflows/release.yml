@@ -155,14 +155,20 @@ jobs:
       - name: Validate Google configuration
         env:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-        run: test -n "$GOOGLE_CLIENT_ID"
+          GOOGLE_DESKTOP_CLIENT_ID: ${{ secrets.GOOGLE_DESKTOP_CLIENT_ID }}
+          GOOGLE_DESKTOP_CLIENT_SECRET: ${{ secrets.GOOGLE_DESKTOP_CLIENT_SECRET }}
+        run: test -n "$GOOGLE_CLIENT_ID" -a -n "$GOOGLE_DESKTOP_CLIENT_ID" -a -n "$GOOGLE_DESKTOP_CLIENT_SECRET"
       - name: Build Linux
         env:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_DESKTOP_CLIENT_ID: ${{ secrets.GOOGLE_DESKTOP_CLIENT_ID }}
+          GOOGLE_DESKTOP_CLIENT_SECRET: ${{ secrets.GOOGLE_DESKTOP_CLIENT_SECRET }}
         run: |
           flutter build linux --release \
             --dart-define=API_BASE_URL="$API_BASE_URL" \
-            --dart-define=GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID"
+            --dart-define=GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" \
+            --dart-define=GOOGLE_DESKTOP_CLIENT_ID="$GOOGLE_DESKTOP_CLIENT_ID" \
+            --dart-define=GOOGLE_DESKTOP_CLIENT_SECRET="$GOOGLE_DESKTOP_CLIENT_SECRET"
       - name: Archive Linux bundle
         run: tar -czf StudentActivities-Linux.tar.gz -C build/linux/x64/release/bundle .
       - name: Package Linux DEB
@@ -278,13 +284,17 @@ jobs:
       - name: Validate Google configuration
         env:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_DESKTOP_CLIENT_ID: ${{ secrets.GOOGLE_DESKTOP_CLIENT_ID }}
+          GOOGLE_DESKTOP_CLIENT_SECRET: ${{ secrets.GOOGLE_DESKTOP_CLIENT_SECRET }}
         shell: pwsh
-        run: if ([string]::IsNullOrWhiteSpace($env:GOOGLE_CLIENT_ID)) { throw "GOOGLE_CLIENT_ID is required" }
+        run: if ([string]::IsNullOrWhiteSpace($env:GOOGLE_CLIENT_ID) -or [string]::IsNullOrWhiteSpace($env:GOOGLE_DESKTOP_CLIENT_ID) -or [string]::IsNullOrWhiteSpace($env:GOOGLE_DESKTOP_CLIENT_SECRET)) { throw "GOOGLE_CLIENT_ID, GOOGLE_DESKTOP_CLIENT_ID, and GOOGLE_DESKTOP_CLIENT_SECRET are required" }
       - name: Build Windows
         env:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_DESKTOP_CLIENT_ID: ${{ secrets.GOOGLE_DESKTOP_CLIENT_ID }}
+          GOOGLE_DESKTOP_CLIENT_SECRET: ${{ secrets.GOOGLE_DESKTOP_CLIENT_SECRET }}
         shell: pwsh
-        run: flutter build windows --release "--dart-define=API_BASE_URL=$env:API_BASE_URL" "--dart-define=GOOGLE_CLIENT_ID=$env:GOOGLE_CLIENT_ID"
+        run: flutter build windows --release "--dart-define=API_BASE_URL=$env:API_BASE_URL" "--dart-define=GOOGLE_CLIENT_ID=$env:GOOGLE_CLIENT_ID" "--dart-define=GOOGLE_DESKTOP_CLIENT_ID=$env:GOOGLE_DESKTOP_CLIENT_ID" "--dart-define=GOOGLE_DESKTOP_CLIENT_SECRET=$env:GOOGLE_DESKTOP_CLIENT_SECRET"
       - name: Archive Windows bundle
         shell: pwsh
         run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath StudentActivities-Windows.zip

@@ -7,13 +7,15 @@ Releases are created by `.github/workflows/release.yml` in the [Student-Activiti
 Configure these GitHub Actions values before using the release workflow:
 
 - `GOOGLE_CLIENT_ID` secret: the Google OAuth client ID used by the app.
+- `GOOGLE_DESKTOP_CLIENT_ID` secret: the Google OAuth **Desktop app** client ID used by Linux and Windows builds.
+- `GOOGLE_DESKTOP_CLIENT_SECRET` secret: the desktop OAuth client secret required by the token exchange.
 - `API_BASE_URL` variable: optional; defaults to `https://api.iitmbs.org`.
 - `ANDROID_KEYSTORE_FILE` secret: base64-encoded release keystore.
 - `ANDROID_KEYSTORE_PASSWORD` secret.
 - `ANDROID_KEY_PASSWORD` secret.
 - `ANDROID_KEY_ALIAS` secret.
 
-The Google client ID is not a private credential, but keeping it in Actions configuration prevents source drift and lets each build environment provide its own OAuth client. The Android keystore values are private and must never be committed.
+The Google client IDs and desktop client secret are supplied through Actions configuration. The desktop secret is not confidential once embedded in a distributed application, but it must not be confused with a backend secret or service-account key. The Android keystore values are private and must never be committed. The backend must also have `GOOGLE_DESKTOP_CLIENT_ID` configured before desktop sign-in can succeed.
 
 ## Release Steps
 

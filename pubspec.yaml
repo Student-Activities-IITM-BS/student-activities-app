@@ -13,6 +13,7 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   http: ^1.6.0
+  crypto: ^3.0.7
   shared_preferences: ^2.5.5
   google_fonts: ^8.1.0
   google_sign_in: ^7.2.0

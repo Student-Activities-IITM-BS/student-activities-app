@@ -52,7 +52,7 @@ Install Flutter 3.44.4 or a compatible stable release. Then create a local build
 cp config/app.example.json config/app.json
 ```
 
-Set `GOOGLE_CLIENT_ID` in `config/app.json`, then run:
+Set `GOOGLE_CLIENT_ID` and, for Linux or Windows, `GOOGLE_DESKTOP_CLIENT_ID` plus `GOOGLE_DESKTOP_CLIENT_SECRET` in `config/app.json`, then run:
 
 ```sh
 flutter pub get
@@ -63,7 +63,9 @@ The Android application ID is `org.iitmbs.sa`. The backend defaults to `https://
 
 ### Google Sign-In configuration
 
-`GOOGLE_CLIENT_ID` is supplied at build time with `--dart-define-from-file` and is intentionally absent from tracked Dart source. It is an OAuth client identifier, not a password: Flutter web and installed applications necessarily expose it in their built artifacts. Security comes from the Google Cloud application restrictions, Android signing certificate restrictions, authorized web origins, and backend token validation. Do not put service-account keys or other private credentials in this app.
+`GOOGLE_CLIENT_ID`, `GOOGLE_DESKTOP_CLIENT_ID`, and `GOOGLE_DESKTOP_CLIENT_SECRET` are supplied at build time with `--dart-define-from-file` and are intentionally absent from tracked Dart source. Android and web use the existing client; Linux and Windows use a Google OAuth client whose application type is **Desktop app**. The desktop flow opens the system browser and returns through a temporary loopback address. Google treats desktop client secrets as public credentials because they cannot be protected inside distributed applications, but service-account keys and backend secrets must never be put in this app. Security comes from the Google Cloud application restrictions, Android signing certificate restrictions, authorized web origins, and backend token validation.
+
+Create the desktop client in the same Google Cloud project as the existing web and Android clients. Add its ID and generated secret to `GOOGLE_DESKTOP_CLIENT_ID` and `GOOGLE_DESKTOP_CLIENT_SECRET`. Configure the backend with the same `GOOGLE_DESKTOP_CLIENT_ID` so it accepts desktop ID-token audiences. The OAuth consent screen must be configured and either published or limited to accounts listed as test users.
 
 For a build without Google Sign-In configuration, the app still compiles, but sign-in reports a configuration error instead of using a source-controlled value.
 
@@ -77,6 +79,12 @@ flutter analyze
 flutter test
 flutter build web --no-wasm-dry-run
 flutter build apk --debug
+```
+
+For a reproducible native Linux build, use the included Nix shell:
+
+```sh
+nix-shell --run 'flutter build linux --release'
 ```
 
 Pull requests run analysis, tests, a web build, and an Android debug build. Version tags trigger the release workflow described in [docs/releasing.md](docs/releasing.md).

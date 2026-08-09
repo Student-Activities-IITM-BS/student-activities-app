@@ -8,6 +8,12 @@ class AppConstants {
   static const String googleClientId = String.fromEnvironment(
     'GOOGLE_CLIENT_ID',
   );
+  static const String googleDesktopClientId = String.fromEnvironment(
+    'GOOGLE_DESKTOP_CLIENT_ID',
+  );
+  static const String googleDesktopClientSecret = String.fromEnvironment(
+    'GOOGLE_DESKTOP_CLIENT_SECRET',
+  );
 
   static const List<String> allowedDomains = [
     'study.iitm.ac.in',
