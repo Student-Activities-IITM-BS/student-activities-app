@@ -39,7 +39,7 @@ class StudentActivitiesApp extends StatelessWidget {
         themeMode: AppPreferences.instance.themeMode,
         onGenerateRoute: (settings) => MaterialPageRoute(
           settings: settings,
-          builder: (_) => const _RouteInformationBridge(),
+          builder: (_) => const SplashScreen(),
         ),
         builder: (context, child) =>
             _SystemInsetSurface(child: child ?? const SizedBox.shrink()),
@@ -82,27 +82,6 @@ class SplashScreen extends StatefulWidget {
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _RouteInformationBridge extends StatefulWidget {
-  const _RouteInformationBridge();
-
-  @override
-  State<_RouteInformationBridge> createState() =>
-      _RouteInformationBridgeState();
-}
-
-class _RouteInformationBridgeState extends State<_RouteInformationBridge> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) Navigator.of(context).maybePop();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) => const SizedBox.shrink();
 }
 
 class _SplashScreenState extends State<SplashScreen> {

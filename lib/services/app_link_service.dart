@@ -17,8 +17,13 @@ class AppLinkService {
   Future<void> initialize() async {
     if (_initialized) return;
     _initialized = true;
-    _subscription = _appLinks.uriLinkStream.listen(_publish);
-    _publish(await _appLinks.getInitialLink());
+    _subscription = _appLinks.uriLinkStream.listen(
+      _publish,
+      onError: (_, _) {},
+    );
+    try {
+      _publish(await _appLinks.getInitialLink());
+    } catch (_) {}
   }
 
   void _publish(Uri? uri) {
