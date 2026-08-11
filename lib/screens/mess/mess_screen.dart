@@ -13,20 +13,20 @@ class MessScreen extends StatefulWidget {
 
 class _MessScreenState extends State<MessScreen> {
   static const _labels = <String, String>{
-    'unifiedVeg': 'Unified Menu - Veg',
-    'unifiedNonVeg': 'Unified Menu - Non-Veg',
-    'northVeg': 'North Indian - Veg',
-    'northNonVeg': 'North Indian - Non-Veg',
-    'southVeg': 'South Indian - Veg',
-    'southNonVeg': 'South Indian - Non-Veg',
-    'jain': 'Jain / Pure Veg',
-    'proteinMessVeg': 'Protein Mess - Veg',
-    'proteinMessNonVeg': 'Protein Mess - Non-Veg',
+    'Unified_Veg': 'Unified Menu - Veg',
+    'Unified_Non_Veg': 'Unified Menu - Non-Veg',
+    'North_Veg': 'North Indian - Veg',
+    'North_Non_Veg': 'North Indian - Non-Veg',
+    'South_Veg': 'South Indian - Veg',
+    'South_Non_Veg': 'South Indian - Non-Veg',
+    'North_Veg_No_Onion_Garlic': 'North Indian - Veg (No Onion/Garlic)',
+    'Protein_Veg': 'Protein Mess - Veg',
+    'Protein_Non_Veg': 'Protein Mess - Non-Veg',
   };
   static const _mealOrder = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
   Map<String, dynamic>? _data;
   DateTime _selectedDate = DateTime.now();
-  String _menuKey = 'unifiedVeg';
+  String _menuKey = 'Unified_Veg';
 
   @override
   void initState() {
@@ -40,13 +40,68 @@ class _MessScreenState extends State<MessScreen> {
     setState(() => _data = Map<String, dynamic>.from(jsonDecode(text) as Map));
   }
 
-  String get _weekLetter {
-    final start = DateTime(2026, 3, 30);
+  static Map<String, dynamic> _asMap(Object? value) {
+    return value is Map
+        ? Map<String, dynamic>.from(value)
+        : const <String, dynamic>{};
+  }
+
+  static DateTime? _parseDate(String value) {
+    final parts = value.split('-');
+    if (parts.length != 3) return null;
+    final year = int.tryParse(parts[0]);
+    final month = int.tryParse(parts[1]);
+    final day = int.tryParse(parts[2]);
+    if (year == null || month == null || day == null) return null;
+    return DateTime(year, month, day);
+  }
+
+  String get _versionKey {
+    final versions = _asMap(_data?['versions']);
+    final keys = versions.keys.map((key) => key.toString()).toList()..sort();
+    if (keys.isEmpty) return '';
+
     final selected = DateTime(
       _selectedDate.year,
       _selectedDate.month,
       _selectedDate.day,
     );
+    var selectedKey = keys.first;
+    for (final key in keys) {
+      final date = _parseDate(key);
+      if (date != null && !date.isAfter(selected)) selectedKey = key;
+    }
+    return selectedKey;
+  }
+
+  Map<String, dynamic> get _category {
+    final versions = _asMap(_data?['versions']);
+    final version = _asMap(versions[_versionKey]);
+    final messMenu = _asMap(version['Messmenu']);
+    final categories = _asMap(messMenu['Categories']);
+    return _asMap(categories[_menuKey]);
+  }
+
+  String get _weekLetter {
+    final selected = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+    );
+    final cycles = _data?['cycles'];
+    var start = DateTime(2026, 4, 1);
+    if (cycles is List) {
+      DateTime? firstStart;
+      DateTime? latestStart;
+      for (final rawCycle in cycles) {
+        final cycle = _asMap(rawCycle);
+        final cycleStart = _parseDate(cycle['startDate']?.toString() ?? '');
+        if (cycleStart == null) continue;
+        firstStart ??= cycleStart;
+        if (!cycleStart.isAfter(selected)) latestStart = cycleStart;
+      }
+      start = latestStart ?? firstStart ?? start;
+    }
     final days = selected.difference(start).inDays;
     const weeks = ['A', 'B', 'C', 'D'];
     return weeks[((days ~/ 7) % 4 + 4) % 4];
@@ -62,6 +117,28 @@ class _MessScreenState extends State<MessScreen> {
     'Sunday',
   ][_selectedDate.weekday - 1];
 
+  String get _cycleName {
+    final cycles = _data?['cycles'];
+    if (cycles is! List) return '';
+    final selected = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+    );
+    for (final rawCycle in cycles) {
+      final cycle = _asMap(rawCycle);
+      final start = _parseDate(cycle['startDate']?.toString() ?? '');
+      final end = _parseDate(cycle['endDate']?.toString() ?? '');
+      if (start != null &&
+          end != null &&
+          !selected.isBefore(start) &&
+          !selected.isAfter(end)) {
+        return cycle['name']?.toString() ?? '';
+      }
+    }
+    return '';
+  }
+
   String? get _currentMeal {
     if (!DateUtils.isSameDay(_selectedDate, DateTime.now())) return null;
     final hour = DateTime.now().hour;
@@ -73,33 +150,20 @@ class _MessScreenState extends State<MessScreen> {
   }
 
   Map<String, List<String>> get _meals {
-    final data = _data;
-    if (data == null) return {};
-    final menus = Map<String, dynamic>.from(data['menuData'] as Map);
-    final menu = menus[_menuKey] is Map
-        ? Map<String, dynamic>.from(menus[_menuKey] as Map)
-        : const <String, dynamic>{};
-    final weeks = menu['weeks'] is Map
-        ? Map<String, dynamic>.from(menu['weeks'] as Map)
-        : const <String, dynamic>{};
-    final week = weeks[_weekLetter] is Map
-        ? Map<String, dynamic>.from(weeks[_weekLetter] as Map)
-        : const <String, dynamic>{};
-    final day = week[_dayName] is Map
-        ? Map<String, dynamic>.from(week[_dayName] as Map)
-        : const <String, dynamic>{};
-    final common = data['commonItems'] is Map
-        ? Map<String, dynamic>.from(data['commonItems'] as Map)
-        : const <String, dynamic>{};
+    if (_data == null) return {};
+    final week = _asMap(_category[_weekLetter]);
+    final schedule = _asMap(week['schedule']);
+    final day = _asMap(schedule[_dayName]);
+    final common = _asMap(_category['common_items']);
     return {
       for (final meal in _mealOrder)
         meal: [
-          ...((day[meal] as List<dynamic>? ?? const []).map(
+          ...((day[meal] is List ? day[meal] as List : const []).map(
             (item) => item.toString(),
           )),
-          ...((common[meal] as List<dynamic>? ?? const []).map(
-            (item) => item.toString(),
-          )),
+          if (common[meal] is String &&
+              (common[meal] as String).trim().isNotEmpty)
+            common[meal] as String,
         ],
     };
   }
@@ -120,7 +184,7 @@ class _MessScreenState extends State<MessScreen> {
                 onPressed: () async {
                   final date = await showDatePicker(
                     context: context,
-                    firstDate: DateTime(2026, 1, 1),
+                    firstDate: DateTime(2026, 4, 1),
                     lastDate: DateTime(2030, 12, 31),
                     initialDate: _selectedDate,
                   );
@@ -134,10 +198,21 @@ class _MessScreenState extends State<MessScreen> {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                'Week $_weekLetter · $_dayName',
-                textAlign: TextAlign.end,
-                style: Theme.of(context).textTheme.labelLarge,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Week $_weekLetter · $_dayName',
+                    textAlign: TextAlign.end,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  if (_cycleName.isNotEmpty)
+                    Text(
+                      _cycleName,
+                      textAlign: TextAlign.end,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                ],
               ),
             ),
           ],
