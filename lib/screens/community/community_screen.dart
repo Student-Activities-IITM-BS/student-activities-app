@@ -910,105 +910,472 @@ class _CommunityLink {
 class _ParadoxOverview extends StatelessWidget {
   const _ParadoxOverview();
 
+  static const _calendar = [
+    ('Saavan', 'September term break', 'Online events and activities'),
+    ('Margazhi', 'December term break', 'Online events and activities'),
+    (
+      'Paradox',
+      'Final week of May',
+      'A four-day festival at the IIT Madras campus',
+    ),
+  ];
+  static const _departments = [
+    'Technicals',
+    'Culturals',
+    'Sports',
+    'Sponsorship',
+    'Multimedia Productions',
+    'Student Relations',
+    'Safety & Security',
+    'WebOps',
+    'Finance and Operations',
+    'Hospitality Relations',
+  ];
+  static const _eligibility = [
+    'A preferred minimum CGPA of 7.',
+    'No malpractice record under the IITM BS Code of Conduct.',
+    'No other Position of Responsibility in the Degree while serving with Paradox.',
+    'Age 25 or below, unless the Steering Committee approves an exception.',
+    'Availability for campus participation when required, with at least two months notice.',
+    'A commitment of 21 hours a week to Paradox work, meetings, training, and fest activities.',
+  ];
+  static const _workingStandards = [
+    'Complete assigned work on time and update the task tracker regularly.',
+    'Complete post-fest work after Saavan, Margazhi, and Paradox.',
+    'Use official communication channels for official matters.',
+    'Keep the reporting structure in place and use the escalation process when needed.',
+  ];
+  static const _teamLadder = [
+    'Steering Committee',
+    'Secretaries',
+    'Department Head and Deputy Department Head',
+    'Super Coordinator',
+    'Coordinator',
+    'Volunteer',
+  ];
+  static const _eventRoles = [
+    'Event Coordinator',
+    'Event Deputy Coordinator',
+    'Event Volunteer',
+  ];
+  static const _charterUrl =
+      'https://docs.google.com/document/d/1RzkXftE0x07uMX1QUxm9D0sGfa0uoIson2SCKlHxy1c/edit?tab=t.0#heading=h.on5izq22fb74';
+
   @override
   Widget build(BuildContext context) {
-    const events = [
-      ('August', 'Paradox in Saavan', 'Online'),
-      ('January', 'Paradox in Margazhi', 'Online'),
-      ('Main event', 'Paradox', 'On campus'),
-    ];
-    const domains = [
-      (Icons.music_note_outlined, 'Cultural'),
-      (Icons.memory_outlined, 'Technical'),
-      (Icons.sports_outlined, 'Sports'),
-      (Icons.public_outlined, 'Outreach'),
-      (Icons.local_cafe_outlined, 'Hospitality'),
-      (Icons.camera_alt_outlined, 'Media'),
-      (Icons.settings_suggest_outlined, 'Operations'),
-    ];
-
+    final scheme = Theme.of(context).colorScheme;
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 112),
       children: [
+        Text(
+          'IIT Madras BS student festival',
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+        const SizedBox(height: 8),
         Text('Paradox', style: Theme.of(context).textTheme.displaySmall),
-        const SizedBox(height: 6),
+        const SizedBox(height: 10),
         Text(
-          'The flagship student festival of the IITM BS Programme.',
-          style: Theme.of(context).textTheme.titleMedium,
+          '"Three fests. One spirit."',
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            color: scheme.primary,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.1,
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         Text(
-          'Competitions, performances, and collaborative experiences bring students together across regions.',
+          'Paradox is the annual student-run festival for IIT Madras BS Degree students. Its on-campus edition runs for four days and brings together technical, sports, and cultural events.',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.45),
-        ),
-        const SizedBox(height: 24),
-        GridView.count(
-          crossAxisCount: 3,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          childAspectRatio: 1.25,
-          children: const [
-            _FestivalStat(value: '5,000+', label: 'Attendees'),
-            _FestivalStat(value: '45+', label: 'Competitions'),
-            _FestivalStat(value: '12', label: 'Committees'),
-          ],
         ),
         const SizedBox(height: 26),
         const SectionHeader(title: 'Festival calendar'),
-        ...events.map(
-          (event) => Padding(
+        ..._calendar.map(
+          (fest) => Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: AppCard(
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text(event.$2),
-                subtitle: Text(event.$1),
-                trailing: StatusChip(
-                  label: event.$3,
-                  color: Theme.of(context).colorScheme.primary,
+                leading: Icon(
+                  Icons.calendar_month_outlined,
+                  color: scheme.primary,
                 ),
+                title: Text(fest.$1),
+                subtitle: Text('${fest.$2}\n${fest.$3}'),
+                isThreeLine: true,
               ),
             ),
           ),
         ),
-        const SizedBox(height: 12),
-        const SectionHeader(title: 'Domains'),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 2.6,
-          children: domains
-              .map(
-                (domain) => AppCard(
+        const SizedBox(height: 16),
+        _CommunityPanel(
+          title: 'The team behind Paradox',
+          icon: Icons.groups_outlined,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Paradox is organised by students through its Steering Committee, Secretaries, department teams, and event teams.',
+              ),
+              const SizedBox(height: 16),
+              ..._teamLadder.indexed.map(
+                (item) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(domain.$1),
-                      const SizedBox(width: 10),
-                      Expanded(
+                      SizedBox(
+                        width: 28,
                         child: Text(
-                          domain.$2,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                          (item.$1 + 1).toString().padLeft(2, '0'),
+                          style: TextStyle(
+                            color: scheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
+                      Expanded(child: Text(item.$2)),
                     ],
                   ),
                 ),
-              )
-              .toList(),
+              ),
+              const Divider(height: 24),
+              const Text(
+                'Event teams',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '${_eventRoles.join(', ')}. Event Coordinators and Deputy Coordinators lead planning and delivery for individual events.',
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        _CommunityPanel(
+          title: 'Departments',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Teams work across the following departments.'),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _departments
+                    .map((item) => Chip(label: Text(item)))
+                    .toList(),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        _CommunityPanel(
+          title: 'Joining the organising team',
+          icon: Icons.verified_user_outlined,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ..._eligibility.map(
+                (item) => _BulletText(text: item, icon: Icons.shield_outlined),
+              ),
+              const Divider(height: 24),
+              const Text(
+                'Promotion requires a completed term in the current role and is decided through application screening and interviews. Applying does not guarantee selection.',
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        _CommunityPanel(
+          title: 'Working in Paradox',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ..._workingStandards.map((item) => _BulletText(text: item)),
+              const Divider(height: 24),
+              const Text(
+                'Event proposals',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Paradox accepts event proposals from individual students. House and Society members may submit on behalf of their House or Society, and should state this in the proposal.',
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        _CommunityPanel(
+          title: 'Grievances and event support',
+          icon: Icons.mail_outline,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'For an event-related concern, contact the relevant department core. If a concern is not resolved through the event team or department core within 48 hours, use the standard escalation path below.',
+              ),
+              const SizedBox(height: 14),
+              ...[
+                ('Technicals', 'technicals@iitmparadox.org'),
+                ('Sports', 'sports@iitmparadox.org'),
+                ('Culturals', 'culturals@iitmparadox.org'),
+              ].map(
+                (contact) => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.email_outlined, color: scheme.primary),
+                  title: Text(contact.$1),
+                  subtitle: Text(contact.$2),
+                  onTap: () => _openCommunityUrl('mailto:${contact.$2}'),
+                ),
+              ),
+              const Divider(height: 18),
+              const Text(
+                'Escalation path',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              const Text('1. Grievance team - grievances@iitmparadox.org'),
+              const Text('2. Secretaries - secretaries@iitmparadox.org'),
+              const Text(
+                '3. Steering Committee - steering-committee@iitmparadox.org',
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        _CommunityPanel(
+          title: 'Full Paradox Charter',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Read the full Charter for departmental SOPs, code-of-conduct provisions, repercussions, and the amendment process.',
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () => _openCommunityUrl(_charterUrl),
+                icon: const Icon(Icons.open_in_new),
+                label: const Text('Open Charter'),
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 }
 
-class _FestivalStat extends StatelessWidget {
-  const _FestivalStat({required this.value, required this.label});
+class _SecOverview extends StatelessWidget {
+  const _SecOverview();
+
+  static const _secretaries = [
+    (
+      'Student Relations Secretary',
+      'SRS',
+      '7.5',
+      [
+        'Supports operational queries, including meeting recording and streaming.',
+        'Manages official Student Activities communication channels and social-media handles.',
+        'Issues bulletins and newsletters, and manages the Student Activity Calendar and announcements Google Group.',
+      ],
+    ),
+    (
+      'Finance Secretary',
+      'FS',
+      '7.5',
+      [
+        'Convenes the Finance Committee constituted by Student Affairs.',
+        'Processes Student Activities Fund applications and maintains ledgers.',
+        'Reviews budgets, reimbursements, MOUs, sponsorship agreements, and fund workflows.',
+      ],
+    ),
+    (
+      'Sports Secretary',
+      'SpS',
+      '7.5',
+      [
+        'Convenes the Sports Committee and routes sports fund proposals through it.',
+        'Oversees sports activities and supports the sports talent pool.',
+      ],
+    ),
+    (
+      'Technical Secretary',
+      'TS',
+      '7.5',
+      [
+        'Convenes the Technicals Committee and routes technical fund proposals through it.',
+        'Oversees technical activities and supports the technical talent pool.',
+      ],
+    ),
+    (
+      'Cultural Secretary',
+      'CS',
+      '7.5',
+      [
+        'Convenes the Cultural Committee and routes cultural fund proposals through it.',
+        'Oversees cultural activities and supports the cultural talent pool.',
+      ],
+    ),
+    (
+      'Election & Ethics Secretary',
+      'EES',
+      '7.5',
+      [
+        'Coordinates with the Student Election Commission and Grievance Redressal Committee.',
+        'Facilitates General Student Body Elections.',
+        'Maintains awareness of conduct and interaction guidelines.',
+      ],
+    ),
+    (
+      'Web Operations & Multimedia Secretary',
+      'WOMS',
+      '7.5',
+      [
+        'Maintains the official student website and election portal.',
+        'Maintains a unified student portal for services and announcements.',
+        'Creates and publishes multimedia content.',
+      ],
+    ),
+  ];
+  static const _eligibility = [
+    'Be enrolled in the Programme when appointed.',
+    'Have a CGPA of at least 7.5, unless the position has a higher threshold.',
+    'Have no active Registration-Keep-Alive status.',
+    'Have no academic or non-academic misconduct conviction.',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 112),
+      children: [
+        Text(
+          'Student leadership and operations',
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Student Executive Committee',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'The Student Executive Committee (SEC) supports the Student Affairs team in maintaining student-community infrastructure and coordinating the Upper House Council, Lower House Council, Societies, and the Paradox team. It facilitates student initiatives across the Programme.',
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.45),
+        ),
+        const SizedBox(height: 24),
+        const _CommitteeStat(value: '08', label: 'Committees'),
+        const SizedBox(height: 26),
+        _CommunityPanel(
+          title: 'Eligibility and tenure',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: _eligibility
+                .map(
+                  (item) =>
+                      _BulletText(text: item, icon: Icons.check_circle_outline),
+                )
+                .toList(),
+          ),
+        ),
+        const SizedBox(height: 26),
+        const SectionHeader(title: 'Voting secretaries'),
+        Text(
+          'Responsibilities by office',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 6),
+        const Text(
+          'These seven secretary offices coordinate student activities. Current office-holder details are shared through official Student Activities channels.',
+        ),
+        const SizedBox(height: 14),
+        ..._secretaries.map(
+          (position) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _SecretaryCard(
+              title: position.$1,
+              designation: position.$2,
+              minimumCgpa: position.$3,
+              responsibilities: position.$4,
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        _CommunityPanel(
+          title: 'Student Activities Fund',
+          icon: Icons.account_balance_wallet_outlined,
+          child: const Text(
+            'The Finance Secretary administers the SAF in accordance with Institute financial rules. A disbursement requires a written proposal endorsed by the relevant Domain Committee, majority approval of the SEC, and a Student Affairs countersignature where mandated.',
+          ),
+        ),
+        const SizedBox(height: 12),
+        _CommunityPanel(
+          title: 'Conduct and authority',
+          icon: Icons.balance_outlined,
+          child: const Text(
+            'SEC members must act with integrity, inclusivity, and respect for Institute regulations. Student Affairs may remove or replace a member for misconduct, academic ineligibility, a breach of conduct standards, or failure to carry out the role.',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CommunityPanel extends StatelessWidget {
+  const _CommunityPanel({required this.title, required this.child, this.icon});
+
+  final String title;
+  final Widget child;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(height: 10),
+          ],
+          Text(title, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 12),
+          DefaultTextStyle.merge(
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium!.copyWith(height: 1.45),
+            child: child,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BulletText extends StatelessWidget {
+  const _BulletText({required this.text, this.icon = Icons.circle});
+
+  final String text;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 9),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 17, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 9),
+          Expanded(child: Text(text)),
+        ],
+      ),
+    );
+  }
+}
+
+class _CommitteeStat extends StatelessWidget {
+  const _CommitteeStat({required this.value, required this.label});
 
   final String value;
   final String label;
@@ -1020,83 +1387,68 @@ class _FestivalStat extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(value, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 2),
-          Text(label, style: Theme.of(context).textTheme.labelSmall),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.labelSmall,
+          ),
         ],
       ),
     );
   }
 }
 
-class _SecOverview extends StatelessWidget {
-  const _SecOverview();
+class _SecretaryCard extends StatelessWidget {
+  const _SecretaryCard({
+    required this.title,
+    required this.designation,
+    required this.minimumCgpa,
+    required this.responsibilities,
+  });
+
+  final String title;
+  final String designation;
+  final String minimumCgpa;
+  final List<String> responsibilities;
+
   @override
   Widget build(BuildContext context) {
-    const departments = [
-      (
-        'Communications',
-        'Student announcements, social media, and outreach.',
-        Icons.campaign_outlined,
-      ),
-      (
-        'Elections and ethics',
-        'Elections, grievances, conduct, and student support.',
-        Icons.how_to_vote_outlined,
-      ),
-      (
-        'Finance',
-        'SAF, budgets, reimbursements, and sponsorships.',
-        Icons.account_balance_outlined,
-      ),
-      (
-        'Web operations',
-        'Student services, web systems, and multimedia.',
-        Icons.language_outlined,
-      ),
-      (
-        'Technical',
-        'Technical events, initiatives, and execution.',
-        Icons.memory_outlined,
-      ),
-      (
-        'Cultural',
-        'Creative initiatives and cultural engagement.',
-        Icons.palette_outlined,
-      ),
-      (
-        'Sports',
-        'Sports events, participation, and talent development.',
-        Icons.sports_outlined,
-      ),
-    ];
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 18, 16, 112),
-      children: [
-        Text(
-          'Student Executive Committee',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'The SEC coordinates student initiatives and serves as a bridge between the student body and university administration.',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.45),
-        ),
-        const SizedBox(height: 20),
-        const SectionHeader(title: 'Departments'),
-        ...departments.map(
-          (item) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: AppCard(
-              child: ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(item.$3),
-                title: Text(item.$1),
-                subtitle: Text(item.$2),
+    final scheme = Theme.of(context).colorScheme;
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              StatusChip(label: designation, color: scheme.primary),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: 8),
+          Text(
+            'Minimum CGPA: $minimumCgpa',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          if (responsibilities.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            ...responsibilities.map((item) => _BulletText(text: item)),
+          ],
+        ],
+      ),
     );
   }
+}
+
+Future<void> _openCommunityUrl(String value) async {
+  final uri = Uri.tryParse(value);
+  if (uri == null) return;
+  await launchUrl(uri, mode: LaunchMode.externalApplication);
 }
