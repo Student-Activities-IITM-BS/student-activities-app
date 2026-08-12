@@ -20,6 +20,32 @@
 
 Student Activities brings campus updates, houses and societies, Voices, recruitment, events, profiles, and student services into one cohesive experience. It is maintained through SEC WebOps and is being built to welcome more student contributors over time.
 
+## Download the app
+
+<p align="center">
+  <a href="https://github.com/Student-Activities-IITM-BS/student-activities-app/releases/latest/download/StudentActivities-Android-universal.apk">
+    <img src="https://img.shields.io/badge/Download_for_Android-latest-2E7D32?style=for-the-badge&logo=android&logoColor=white" alt="Download the latest Student Activities app for Android">
+  </a>
+</p>
+
+### Install on Android
+
+1. Tap the download button above and wait for the APK to finish downloading.
+2. Open `StudentActivities-Android-universal.apk` from your browser's downloads.
+3. If Android blocks the installation, open the setting shown on screen and allow installs from that browser or file manager.
+4. Return to the installer and tap **Install**.
+5. After installation, turn off the "install unknown apps" permission if you no longer need it.
+
+Before installing, compare the downloaded file's SHA-256 checksum with this value:
+
+```text
+4935865f09f39d416c185f7ee56b17c7a37265ad67358642d7fafcf8f5cca3a3
+```
+
+On Android, use a SHA-256 checksum utility to select the downloaded APK and compare its result with the value above. Do not install the APK if the values differ.
+
+Windows and Linux downloads are available on the [latest release page](https://github.com/Student-Activities-IITM-BS/student-activities-app/releases/latest). Each file on that page includes a SHA-256 checksum. iOS installation is not available yet because the current IPA is unsigned, and the current release does not include a macOS build.
+
 ## Features
 
 - **Home and updates** for announcements, notices, and community news.
