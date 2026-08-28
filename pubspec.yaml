@@ -22,7 +22,7 @@ dependencies:
   dio: ^5.11.0
   flutter_secure_storage: ^10.0.0
   socket_io_client: ^3.1.6
-  gpt_markdown: ^1.1.8
+  gpt_markdown: ^1.2.1
   app_links: ^7.2.1
 
 dev_dependencies:
